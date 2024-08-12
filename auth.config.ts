@@ -1,6 +1,7 @@
 import { NextAuthConfig } from 'next-auth';
 import CredentialProvider from 'next-auth/providers/credentials';
 import GithubProvider from 'next-auth/providers/github';
+import { generalApi } from './services/generalApi';
 
 const authConfig = {
   providers: [
@@ -18,25 +19,33 @@ const authConfig = {
         }
       },
       async authorize(credentials, req) {
-        const user = {
-          id: '1',
-          name: 'John',
-          email: credentials?.email as string
-        };
-        if (user) {
-          // Any object returned will be saved in `user` property of the JWT
-          return user;
-        } else {
-          // If you return null then an error will be displayed advising the user to check their details.
-          return null;
-
-          // You can also Reject this callback with an Error thus the user will be sent to the error page with the error message as a query parameter
+        if (!credentials) return null;
+        const { email, password } = credentials;
+        const result = await generalApi.loginWithEmail(
+          email as string,
+          password as string
+        );
+        if (result) {
+          const user = result.user;
+          const token = result.tokens;
+          const res = {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            token: token.access_token,
+            refresh_token: token.refresh_token,
+            access_expires: token.access_expires,
+            refresh_expires: token.refresh_expires
+          };
+          return res;
         }
+        return null;
       }
     })
   ],
   pages: {
-    signIn: '/' //sigin page
+    signIn: '/login' //sigin page
   }
 } satisfies NextAuthConfig;
 
