@@ -118,6 +118,12 @@ export const navItems: NavItem[] = [
     label: 'Dashboard'
   },
   {
+    title: 'Information',
+    href: '/dashboard/info',
+    icon: 'pizza',
+    label: 'Information'
+  },
+  {
     title: 'User',
     href: '/dashboard/user',
     icon: 'user',
@@ -140,11 +146,5 @@ export const navItems: NavItem[] = [
     href: '/dashboard/kanban',
     icon: 'kanban',
     label: 'kanban'
-  },
-  {
-    title: 'Login',
-    href: '/',
-    icon: 'login',
-    label: 'login'
   }
 ];
