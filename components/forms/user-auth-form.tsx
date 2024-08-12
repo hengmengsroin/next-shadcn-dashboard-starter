@@ -11,11 +11,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signIn } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import GithubSignInButton from '../github-auth-button';
+import { useToast } from '../ui/use-toast';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Enter a valid email address' }),
@@ -29,10 +30,12 @@ type UserFormValue = z.infer<typeof formSchema>;
 export default function UserAuthForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl');
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
   const defaultValues = {
-    email: 'demo@gmail.com',
-    password: ''
+    email: 'admin@gmail.com',
+    password: 'admin@123'
   };
   const form = useForm<UserFormValue>({
     resolver: zodResolver(formSchema),
@@ -40,10 +43,33 @@ export default function UserAuthForm() {
   });
 
   const onSubmit = async (data: UserFormValue) => {
-    signIn('credentials', {
-      email: data.email,
-      callbackUrl: callbackUrl ?? '/dashboard'
-    });
+    setLoading(true);
+    try {
+      const result = await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+        redirect: false
+      });
+      console.log({ result });
+
+      if (result?.error) {
+        toast({
+          title: 'Login error',
+          variant: 'destructive',
+          description: 'Credentials is incorrect.'
+        });
+      } else {
+        router.push(callbackUrl ?? '/dashboard');
+      }
+    } catch (error) {
+      toast({
+        title: 'Login error',
+        variant: 'destructive',
+        description: 'Credentials is incorrect.'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -90,7 +116,7 @@ export default function UserAuthForm() {
             )}
           />
           <Button disabled={loading} className="ml-auto w-full" type="submit">
-            Login
+            {loading ? 'Loading...' : 'Login'}
           </Button>
         </form>
       </Form>

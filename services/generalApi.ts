@@ -25,7 +25,6 @@ class GeneralApi {
       email,
       password
     });
-
     return result;
   }
 
