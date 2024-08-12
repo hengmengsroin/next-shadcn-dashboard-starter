@@ -34,8 +34,8 @@ export default function UserAuthForm() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const defaultValues = {
-    email: 'admin@gmail.com',
-    password: 'admin@123'
+    email: '',
+    password: ''
   };
   const form = useForm<UserFormValue>({
     resolver: zodResolver(formSchema),
